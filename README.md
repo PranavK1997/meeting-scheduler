@@ -11,7 +11,12 @@ This is a simple React application bootstrapped with Vite.
 
 1. Clone the repository:
    git clone https://github.com/PranavK1997/meeting-scheduler.git
-   cd meeting-scheduler
+
+2. cd meeting-scheduler
+
+3. npm install
+
+4. npm run dev
 
 ## Additional Features
 

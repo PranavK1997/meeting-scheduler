@@ -1,46 +1,59 @@
-import * as XLSX from "xlsx";
+import * as XLSX from "xlsx-js-style";
 
-export function exportSchedule(schedule) {
-  const wb = XLSX.utils.book_new();
-  const data = [];
+export function exportAttendanceData(schedule) {
+  const workbook = XLSX.utils.book_new();
+
+  const borderStyle = {
+    border: {
+      top: { style: "thin", color: { rgb: "000000" } },
+      bottom: { style: "thin", color: { rgb: "000000" } },
+      left: { style: "thin", color: { rgb: "000000" } },
+      right: { style: "thin", color: { rgb: "000000" } },
+    },
+  };
+
+  const headerStyle = {
+    ...borderStyle,
+    font: { bold: true },
+  };
 
   Object.entries(schedule).forEach(([date, meetings]) => {
-    meetings.forEach((m) => {
-      data.push({
-        Date: formatDate(date),
-        "Student Name": m.student_name,
-        Class: m.class_name,
-        Age: m.age,
-        "Meeting Link": m.meeting_link,
-        Attendance: m.status,
-      });
-    });
+    const formattedDate = formatDate(date);
+
+    const worksheetData = [
+      [
+        { v: "Date", s: headerStyle },
+        { v: "Student Name", s: headerStyle },
+        { v: "Class", s: headerStyle },
+        { v: "Age", s: headerStyle },
+        { v: "Meeting Link", s: headerStyle },
+        { v: "Attendance", s: headerStyle },
+      ],
+      ...meetings.map((m) => [
+        { v: formattedDate, s: borderStyle },
+        { v: m.student_name, s: borderStyle },
+        { v: m.class_name, s: borderStyle },
+        { v: m.age, s: borderStyle },
+        {
+          v: m.meeting_link,
+          l: { Target: m.meeting_link },
+          s: {
+            ...borderStyle,
+            font: { color: { rgb: "0000EE" }, underline: true },
+          },
+        },
+        { v: m.status, s: borderStyle },
+      ]),
+    ];
+
+    const ws = XLSX.utils.aoa_to_sheet(worksheetData);
+    XLSX.utils.book_append_sheet(workbook, ws, formattedDate);
   });
 
-  const ws = XLSX.utils.json_to_sheet(data);
-
-  const range = XLSX.utils.decode_range(ws["!ref"]);
-  for (let R = range.s.r; R <= range.e.r; ++R) {
-    for (let C = range.s.c; C <= range.e.c; ++C) {
-      const cell = ws[XLSX.utils.encode_cell({ r: R, c: C })];
-      if (cell) {
-        cell.s = {
-          border: {
-            top: { style: "thin", color: { rgb: "000000" } },
-            bottom: { style: "thin", color: { rgb: "000000" } },
-            left: { style: "thin", color: { rgb: "000000" } },
-            right: { style: "thin", color: { rgb: "000000" } },
-          },
-        };
-      }
-    }
-  }
-
-  XLSX.utils.book_append_sheet(wb, ws, "All Meetings");
-  XLSX.writeFile(wb, "meeting_schedule.xlsx");
+  XLSX.writeFile(workbook, "MeetingScheduler.xlsx");
 }
 
 function formatDate(dateStr) {
-  const [yyyy, mm, dd] = dateStr.split("-");
-  return `${dd}-${mm}-${yyyy}`;
+  const [year, month, day] = dateStr.split("-");
+  return `${day}-${month}-${year}`;
 }

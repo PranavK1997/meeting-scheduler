@@ -7,16 +7,23 @@ export default function Overview({ schedule }) {
   let totalMeetings = 0;
   let completedMeetings = 0;
 
+  const uniqueMeetings = new Set();
+
   Object.values(schedule).forEach((meetings) => {
     meetings.forEach((m) => {
-      totalMeetings++;
-      if (m.status === "Completed") completedMeetings++;
+      const key = `${m.student_name}-${m.class_name}-${m.age}`;
+      if (!uniqueMeetings.has(key)) {
+        uniqueMeetings.add(key);
 
-      if (!classSummary[m.class_name]) {
-        classSummary[m.class_name] = { count: 0, completed: 0 };
+        if (!classSummary[m.class_name]) {
+          classSummary[m.class_name] = { count: 0, completed: 0 };
+        }
+        classSummary[m.class_name].count++;
+        if (m.status === "Completed") classSummary[m.class_name].completed++;
+
+        totalMeetings++;
+        if (m.status === "Completed") completedMeetings++;
       }
-      classSummary[m.class_name].count++;
-      if (m.status === "Completed") classSummary[m.class_name].completed++;
     });
   });
 
@@ -33,23 +40,25 @@ export default function Overview({ schedule }) {
           <table className="min-w-full my-2 border">
             <thead className="bg-gray-100">
               <tr>
-                <th className="px-2 py-1">Student</th>
-                <th className="px-2 py-1">Class</th>
-                <th className="px-2 py-1">Age</th>
-                <th className="px-2 py-1">Link</th>
-                <th className="px-2 py-1">Status</th>
+                <th className="px-3 py-2 text-left border">Student</th>
+                <th className="px-3 py-2 text-left border">Class</th>
+                <th className="px-3 py-2 text-left border">Age</th>
+                <th className="px-3 py-2 text-left border">Meeting Link</th>
+                <th className="px-3 py-2 text-left border">Status</th>
               </tr>
             </thead>
             <tbody>
               {meetings.map((m, i) => (
                 <tr key={i} className="hover:bg-gray-50">
-                  <td className="px-2 py-1">{m.student_name}</td>
-                  <td className="px-2 py-1">{m.class_name}</td>
-                  <td className="px-2 py-1">{m.age}</td>
-                  <td className="px-2 py-1 text-blue-600 break-all">
-                    {m.meeting_link}
+                  <td className="px-3 py-2 border">{m.student_name}</td>
+                  <td className="px-3 py-2 border">{m.class_name}</td>
+                  <td className="px-3 py-2 border">{m.age}</td>
+                  <td className="px-3 py-2 border text-blue-600">
+                    <a href={m.meeting_link} target="_blank" rel="noreferrer">
+                      {m.meeting_link}
+                    </a>
                   </td>
-                  <td className="px-2 py-1">{m.status}</td>
+                  <td className="px-3 py-2 border">{m.status}</td>
                 </tr>
               ))}
             </tbody>
@@ -62,17 +71,17 @@ export default function Overview({ schedule }) {
         <table className="w-full border">
           <thead className="bg-gray-100">
             <tr>
-              <th className="px-2 py-1 text-left">Class</th>
-              <th className="px-2 py-1 text-left">Total Meetings</th>
-              <th className="px-2 py-1 text-left">Completed</th>
+              <th className="px-3 py-2 text-left border">Class</th>
+              <th className="px-3 py-2 text-left border">Total Meetings</th>
+              <th className="px-3 py-2 text-left border">Completed</th>
             </tr>
           </thead>
           <tbody>
             {Object.entries(classSummary).map(([className, stats], i) => (
               <tr key={i} className="hover:bg-gray-50">
-                <td className="px-2 py-1">{className}</td>
-                <td className="px-2 py-1">{stats.count}</td>
-                <td className="px-2 py-1">{stats.completed}</td>
+                <td className="px-3 py-2 border">{className}</td>
+                <td className="px-3 py-2 border">{stats.count}</td>
+                <td className="px-3 py-2 border">{stats.completed}</td>
               </tr>
             ))}
           </tbody>
