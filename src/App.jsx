@@ -1,36 +1,57 @@
-// src/App.jsx
-import { useState } from "react";
-import "./App.css";
+import React, { useState } from "react";
+import students from "./data/dummyData";
+import { generateSchedule } from "./utils/scheduling";
+import CalendarGrid from "./components/CalendarGrid";
+import Overview from "./components/Overview";
+import ExportButton from "./components/ExportButton";
 
 function App() {
-  const [count, setCount] = useState(0);
+  const [selectedDates, setSelectedDates] = useState([]);
+  const [schedule, setSchedule] = useState({});
+
+  const handleSchedule = () => {
+    const sched = generateSchedule(students, selectedDates);
+    setSchedule(sched);
+  };
+
+  const resetSchedule = () => {
+    setSchedule({});
+    setSelectedDates([]);
+  };
 
   return (
-    <div className="App">
-      <div>
-        <a href="https://vitejs.dev" target="_blank" rel="noreferrer">
-          <img src="/vite.svg" className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank" rel="noreferrer">
-          <img
-            src="https://reactjs.org/logo-og.png"
-            className="logo react"
-            alt="React logo"
-          />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
+    <div className="min-h-screen p-6 bg-gray-50 text-gray-900">
+      <h1 className="text-3xl font-bold mb-6 text-center sticky top-0 bg-gray-50 z-10 shadow p-4">
+        📅 Meeting Scheduler
+      </h1>
+
+      <section className="mb-8">
+        <h2 className="font-semibold mb-2">Select Dates</h2>
+        <CalendarGrid selected={selectedDates} setSelected={setSelectedDates} />
+      </section>
+
+      <section className="mb-8 space-x-4">
+        <button
+          onClick={handleSchedule}
+          disabled={!selectedDates.length}
+          className="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded disabled:bg-gray-300"
+        >
+          Schedule Meetings
         </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+
+        {Object.keys(schedule).length > 0 && (
+          <button
+            onClick={resetSchedule}
+            className="px-6 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded"
+          >
+            Reset Schedule
+          </button>
+        )}
+      </section>
+
+      <Overview schedule={schedule} />
+
+      <ExportButton schedule={schedule} />
     </div>
   );
 }
